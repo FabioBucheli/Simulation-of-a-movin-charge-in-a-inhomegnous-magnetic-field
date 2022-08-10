@@ -1,18 +1,15 @@
-from cgitb import text
 from scipy.integrate import solve_ivp
 import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.pyplot import figure
-
 from matplotlib.widgets import TextBox
 from matplotlib.widgets import Button
 
-
-#Erstellen des Plot-Objekts als 3D Objekt
+# Erstellen des Plot-Objekts als 3D Objekt
 fig = plt.figure(figsize=(10, 8))
 ax = fig.add_subplot(projection='3d')
 
-#Beschriftung der x, y und z Achse
+# Beschriftung der x, y und z Achse
 ax.set_xlabel('X-Koordinate')
 ax.set_ylabel('Y-Koordinate')
 ax.set_zlabel('Z-Koordinate')
@@ -31,8 +28,7 @@ vz0 = 0.007
 t0 = 0
 tf = 300
 
-
-# Definieren der Postion und stärke beider Magneten
+# Definieren der Postion und Stärke beider Magneten
 m1 = np.array([0, 0.5, 0])*0.001
 r1 = np.array([0, 0, 0])
 m2 = np.array([0, 0.5, 0])*0.001
@@ -48,7 +44,6 @@ def helperX(text):
     xhelper = float(text)
     global x0 
     x0 = float(text)
-
 
 def helperY(text):
     global yhelper
@@ -83,11 +78,10 @@ def helperVZ(text):
 def helperT(text):
     global thelper
     thelper = float(text)
-    #Befehl zur Ausführung des Programms bei einem Submit. Ein Submit passiert bei einem Druck der Enter-Taste oder beim Herauklicken aus dem Kasten.
+    # Befehl zur Ausführung der Simulation bei einem Submit. Ein Submit passiert bei einem Druck der Enter-Taste oder beim Herauklicken aus dem Kasten.
     submit(x0, y0, z0, vx0, vy0, vz0, float(text))
     global tf
     tf = float(text)
-
 
 # Funktion zur Berechnung der Bewegung des Teilchens und Defintion der Parameter, die im Plot angezeigt werden.
 def submit(xx, yy, zz, vxx, vyy, vzz, tf):
@@ -103,10 +97,10 @@ def submit(xx, yy, zz, vxx, vyy, vzz, tf):
         # Berechnung des Abstandes von der bewegten Ladung zu den beiden Magneten.
         ra1 = o - r1
         ra2 = o - r2
-        # Berechnung des Betrags des Abstandes vom der bewegten Ladung zu den beiden Magneten.
+        # Berechnung des Betrags des Abstandes von der bewegten Ladung zu den beiden Magneten.
         rar1 = np.sqrt(sum(ra1*ra1))
         rar2 = np.sqrt(sum(ra2*ra2))
-        # Berechnung der beiden Magnetflüsse am Ort des Teilchens, welche von den beiden Stabmagneten ausgeht. Diese Gleichung rechnet mit dem Abstand von Magnet und Körper und dessen Betrag und Dipolmoment des jeweiligen Teilchens.
+        # Berechnung der beiden Magnetflüsse am Ort des Teilchens, welche von den beiden Stabmagneten ausgeht. Diese Gleichung rechnet mit dem Abstand von den Magneten zu dem Körper ra1,ra2 und dessen Beträge rar1,rar2 und Dipolmoment der Magnete m1,m2
         B1 = 0.00000001*((3 * (np.dot(m1, (ra1)/rar1))*((ra1)/rar1)-m1)/(rar1*rar1*rar1))
         B2 = 0.00000001*((3 * (np.dot(m2, (ra2)/rar2))*((ra2)/rar2)-m2)/(rar2*rar2*rar2))
         # Berechnung der Summe der Magnetflüsse
@@ -124,16 +118,17 @@ def submit(xx, yy, zz, vxx, vyy, vzz, tf):
     # Festlegung der Variabeln für die Startbedingungen
     D0 = [xx, yy, zz, vxx, vyy, vzz]
 
-    # Methode für Lösung des Startwertproblems mithilfe von RungaKutta des 5ten Grades
+    # Methode für Lösung des Startwertproblems mithilfe von RungaKutta des 8ten Grades
     NumSol = solve_ivp(mag_bewegung, [t0, tf], D0, method="DOP853", args=(m1, m2, Q, r1, r2, a), atol=1e-10, rtol=1e-13)
     # Aufspaltung der Geschwindigkeit und des Ortes des Teilchens und des Zeitschrittes aus dem Objekt, das aus der solve_ivp Methode kommt. Dies erhält man als array und 
     aa, bb, cc, dd, ee, ff = NumSol.y
     t = NumSol.t
 
+    # Definieren welche Werte im Plot auf welcher Achse angezeigt werden
     ax.plot(aa, bb, cc)
     plt.draw()
 
-#Definierung des Ortes und Grösse des Eingabefeldes
+# Definieren des Ortes und Grösse des Eingabefeldes
 xbox = plt.axes([0.05, 0.1125, 0.125, 0.05])
 ybox = plt.axes([0.05, 0.0625, 0.125, 0.05])
 zbox = plt.axes([0.05, 0.0125, 0.125, 0.05])
@@ -144,7 +139,7 @@ vzbox = plt.axes([0.05, 0.175, 0.125, 0.05])
 
 tbox = plt.axes([0.05, 0.3325, 0.125, 0.05])
 
-#Definierung des Textbox Objekt des Eingabefeldes mit der obig Definierten Ort und Grösse.
+# Definieren des Textbox Objekt des Eingabefeldes mit dem obig definierten Ort und Grösse.
 KoordinateX = TextBox(xbox, 'X0', initial=float(x0))
 KoordinateY = TextBox(ybox, 'Y0', initial=float(y0))
 KoordinateZ = TextBox(zbox, 'Z0', initial=float(z0))
